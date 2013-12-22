@@ -7,6 +7,7 @@ class PcaController extends Controller
 	 * using two-column layout. See 'protected/views/layouts/column2.php'.
 	 */
 	public $errorMessage;
+
 	public $layout='//layouts/column2';
 
 	/**
@@ -20,6 +21,7 @@ class PcaController extends Controller
 		);
 	}
 
+	
 	/**
 	 * Specifies the access control rules.
 	 * This method is used by the 'accessControl' filter.
@@ -75,42 +77,28 @@ class PcaController extends Controller
 		));
 	}
 
-	/**
-	 * Returns the data model based on the primary key given in the GET variable.
-	 * If the data model is not found, an HTTP exception will be raised.
-	 * @param integer $id the ID of the model to be loaded
-	 * @return Pca the loaded model
-	 * @throws CHttpException
-	 */
-	public function loadModel($id)
-	{
-		$model=Pca::model()->findByPk($id);
-
-		if($model===null)
-			throw new CHttpException(404,'The requested page does not exist.');
-		return $model;
-	}
 
 	public function actionGenerateExcel($id=null)
 	{
 		if(isset($id)) {
 
 			$model = Pca::model()->findAll('pca_id='.$id);
-			$columns_to_display = $this->getColumnstoDisplay($model, $model[0]->pca_excel_has_many_realations,
+			$columns_to_display = $this->getColumnstoDisplay($model, $model[0]->pca_excel_has_many_realations, 
 				array('pca_id', 'partner_id', 'received_date', 'is_approved', 'cash_for_supply_budget'), array('PcaFile','PcaUserActionRel'));
 			$this->toExcel($model, $columns_to_display);
 
 		} elseif (isset($_POST['hidden_excel'])) {
-
-			$pca_ids = explode(",", $_POST['hidden_excel'][0]);
+			
+			$pca_ids = explode(",", $_POST['hidden_excel'][0]); 
 			$criteria = new CDbCriteria;
 			$criteria->addInCondition('pca_id', $pca_ids);
 			$model = Pca::model()->findAll($criteria);
-			$columns_to_display = $this->getColumnstoDisplay($model, $model[0]->pca_excel_has_many_realations,
+			$columns_to_display = $this->getColumnstoDisplay($model, $model[0]->pca_excel_has_many_realations, 
 				array('pca_id', 'partner_id', 'received_date', 'is_approved', 'cash_for_supply_budget') , array('PcaFile','PcaUserActionRel'));
-			$this->toExcel($model, $columns_to_display, get_class($model[0]));
+			$this->toExcel($model, $columns_to_display, get_class($model[0]));	
 		}
 	}
+
 
 	/**
 	 * Creates a new model.
@@ -125,19 +113,19 @@ class PcaController extends Controller
 		// $this->performAjaxValidation($model);
 
 		if(isset($_POST['Pca']))
-		{
+		{	
 
 				$out;
 				$relatedTables = array();
                 $target_exists =false;
 				$model->attributes=$_POST['Pca'];
 			   // echo 22;
-
+				
 			if ($model->validate())
 				{
-
+				
 					// post pca activities
-
+				
 					if(isset ($_POST['Pca']['PcaActivity']))
 					{
 						$model->PcaActivity = $_POST['Pca']['PcaActivity'];
@@ -160,17 +148,10 @@ class PcaController extends Controller
 
 					if(isset ($_POST['Pca']['PcaGrantRel']['grant_id'][0] ))
 					{
-                        if ($_POST['Pca']['PcaGrantRel']['grant_id'][0] != NULL)
-                        {
-                            $this->transpose($_POST['Pca']['PcaGrantRel'], $grants)	;
-                            $model->PcaGrantRel = $grants;
-                            $relatedTables[] = 'PcaGrantRel';
-
-                        }
-
-
+						$this->transpose($_POST['Pca']['PcaGrantRel'], $grants)	;
+						$model->PcaGrantRel = $grants;
+						$relatedTables[] = 'PcaGrantRel';
 					}
-
 
 
 
@@ -199,45 +180,40 @@ class PcaController extends Controller
 
 					if(isset($_POST['Pca']['GwPcaLocRel']['location_id'][0]))
 					{
-                        if ($_POST['Pca']['GwPcaLocRel']['location_id'][0] != NULL)
-                        {
 
-                            $lgw_array = array(); //location gateway array;
-                            $locations = $_POST['Pca']['GwPcaLocRel']['location_id'];
+						$lgw_array = array(); //location gateway array;
+						$locations = $_POST['Pca']['GwPcaLocRel']['location_id'];
 
-                            $i=0;
-                            foreach ($locations as $l_key => $l_value) {
-                                $l_number = "l";
-                                $l_number .= $l_key+1;
-                                //echo $l_number;
-                                $gateways = $_POST['Pca']['GwPcaLocRel']['gateway_id'][$l_number];
-                                foreach ((array)$gateways as $gw_key => $gw_value) {
-                                    //echo $l_value."-".$gw_value." / ";
-                                    //$this->array_insert(&$lgw_array, $l_value, $gw_value );
+						$i=0;
+						foreach ($locations as $l_key => $l_value) {
+							$l_number = "l";
+							$l_number .= $l_key+1;
+							//echo $l_number;
+							$gateways = $_POST['Pca']['GwPcaLocRel']['gateway_id'][$l_number];
+							foreach ((array)$gateways as $gw_key => $gw_value) {
+								//echo $l_value."-".$gw_value." / ";
+								//$this->array_insert(&$lgw_array, $l_value, $gw_value );
 
-                                    $lgw_array[$i]['location_id'] = $l_value;
-                                    $lgw_array[$i]['gateway_id'] = $gw_value;
-                                    $i++;
-                                }
+								$lgw_array[$i]['location_id'] = $l_value;
+								$lgw_array[$i]['gateway_id'] = $gw_value;
+								$i++;
+							}
 
 
-                            }
-                             $model->GwPcaLocRel = $lgw_array;
-                             $relatedTables[] = 'GwPcaLocRel';
-                        }
+						}
+						 $model->GwPcaLocRel = $lgw_array;
+						 $relatedTables[] = 'GwPcaLocRel';
 					}
 
-
+                   // echo "memory usage on create: " . memory_get_usage(true)."\n";
+					//save pca with relations
                      if (isset ($_POST['targets_to_delete']))
                          $model->targets_to_delete = $_POST['targets_to_delete'];
-
-
-
-                if($model->saveWithRelated($relatedTables))
+					if($model->saveWithRelated($relatedTables))
 					{
 						//update total target progress if not empty
 						if ($target_exists)
-						{
+						{	
 							//$this->transpose($_POST['Pca']['PcaTargetProgressRel'], $out);
 
 							$this->updateTargetProgress('TargetProgress', $model->pca_target_progress, 1);
@@ -257,7 +233,7 @@ class PcaController extends Controller
                         $this->redirect(array('view','id'=>$model->pca_id));
 					}
 				}
-
+			
 		 }
 
 		$this->render('create',array(
@@ -265,50 +241,6 @@ class PcaController extends Controller
 
 		));
 	}
-
-    public function addFiles($files, $file_categories, $pca_id)
-    {
-       // $files = CUploadedFile::getInstancesByName('files');
-       // $file_categories = $_POST['UploadedFile']['file_category'];
-
-        // proceed if the images have been set
-        if (isset($files) && count($files) > 0) {
-
-            if(!is_dir(Yii::getPathOfAlias('webroot').'/protected/files/pcas/'. $pca_id))
-            {
-                mkdir(Yii::getPathOfAlias('webroot').'/protected/files/pcas/'. $pca_id);
-                chmod(Yii::getPathOfAlias('webroot').'/protected/files/pcas/'. $pca_id, 0755);
-            }
-
-            // go through each uploaded file
-            foreach ($files as $file_key => $file_value) {
-                if(!is_dir(Yii::getPathOfAlias('webroot').'/protected/files/pcas/'. $pca_id.'/'.$file_categories[$file_key]))
-                {
-                    mkdir(Yii::getPathOfAlias('webroot').'/protected/files/pcas/'.$pca_id.'/'.$file_categories[$file_key]);
-                    chmod(Yii::getPathOfAlias('webroot').'/protected/files/pcas/'. $pca_id.'/'.$file_categories[$file_key], 0755);
-                }
-
-
-                if ($file_value->saveAs(Yii::getPathOfAlias('webroot').'/protected/files/pcas/'. $pca_id.'/'.$file_categories[$file_key].'/'.$file_value->name)) {
-                    // add it to the main model now
-                    $pca_file_add = new PcaFile();
-                    $pca_file_add->file_name = $file_value->name; //it might be $img_add->name for you, filename is just what I chose to call it in my model
-                    $pca_file_add->pca_id= $pca_id; // this links your picture model to the main model (like your user, or profile model)
-                    $pca_file_add->file_category = $file_categories[$file_key];
-
-                    $pca_file_add->save(); // DONE
-                }
-                else
-                {
-                    echo 'Cannot upload!';
-
-                }
-
-            }
-
-
-        }
-    }
 
 	function array_insert(&$array, $key, $data)
 	{
@@ -326,6 +258,7 @@ class PcaController extends Controller
 	    }
 	}
 
+
 	/**
 	 * Updates a particular model.
 	 * If update is successful, the browser will be redirected to the 'view' page.
@@ -338,12 +271,12 @@ class PcaController extends Controller
 		$old_status = $model->status;
 
 		// Uncomment the following line if AJAX validation is needed
-		// $this->performAjaxValidation($model);
+		// $this->performAjaxValidation($model);		
 		if(isset($_POST['Pca']))
 		{
             $target_exists =false;
 			$relatedTables = array();
-			// }// deduct targets that are not implemented from total indicator targets.
+			// }// deduct targets that are not implemented from total indicator targets. 
 			// else if ($model->status == "canceled")
 			// {
 
@@ -351,8 +284,8 @@ class PcaController extends Controller
 
 			$model->attributes=$_POST['Pca'];
 			$new_status = $model->status;
-
-
+	
+			
 			if($new_status == "canceled" && $old_status != "canceled")
 			{
                 if ($model_target_progress[0]['target_id'] != NULL)
@@ -373,11 +306,11 @@ class PcaController extends Controller
                         $target_progress_row[] = array('target_id'=>$value['target_id'],'unit_id'=>$value['unit_id'],'total'=>$value['total'],'dif_total'=> $value['shortfall']);
                         # code...
                     }
-				$this->updateTargetProgress(TargetProgress, $target_progress_row, 0);
+				$this->updateTargetProgress(TargetProgress, $target_progress_row, 0);		
 
                 }
             }
-
+								
 				$model->PcaActivity = $_POST['Pca']['PcaActivity'];
 				$relatedTables[] = 'PcaActivity';
 
@@ -472,7 +405,7 @@ class PcaController extends Controller
 			$model->targets_to_delete = $_POST['targets_to_remove'];
 
 			if($model->saveWithRelated($relatedTables))
-			{
+			{	
 
 				$date = date("Y-m-d H:i:s");
 
@@ -503,7 +436,7 @@ class PcaController extends Controller
 //						)); // set existing target to inactive
 //					}
 //				}
-
+				
 				if ($target_exists)
 				{
 
@@ -535,15 +468,17 @@ class PcaController extends Controller
 
 		$this->render('update',array(
 			'model'=>$model,
-
+			
 		));
 	}
+
 
     public function targetsToDelete($targets)
     {
 
     }
 
+	
 	/**
 	 * Deletes a particular model.
 	 * If deletion is successful, the browser will be redirected to the 'admin' page.
@@ -552,7 +487,7 @@ class PcaController extends Controller
 	public function actionDelete($id)
 	{
 		$loaded = $this->loadModel($id);
-
+		
 
 		try {
 
@@ -568,7 +503,7 @@ class PcaController extends Controller
 
 		} catch (Exception $e) {
 			$error_message = "";
-
+			
 			foreach ($loaded->pca_cannot_delete_dep as $key => $value) {
 				if (strpos($e->getMessage(), $key))
 					$error_message = $value;
@@ -582,13 +517,13 @@ class PcaController extends Controller
 				header('HTTP/1.1 500', 'internal error');
         		echo 'PCA "'.$loaded->title.'" cannot be deleted due to the following dependecies: '.$error_message;//html for 500 page
 
-			}
+			} 
 		}
-
-
+		
+		
 		// if AJAX request (triggered by deletion via admin grid view), we should not redirect the browser
-
-
+		
+		
 	}
 
 	/**
@@ -611,14 +546,35 @@ class PcaController extends Controller
 		//$model->unsetAttributes();  // clear any default values
 		if(isset($_GET['Pca'])){
 			$model->attributes=$_GET['Pca'];
-
+			
 		}
-
-
+		
+	
 		$this->render('admin',array(
 			'model'=>$model,
 		));
 	}
+
+	/**
+	 * Returns the data model based on the primary key given in the GET variable.
+	 * If the data model is not found, an HTTP exception will be raised.
+	 * @param integer $id the ID of the model to be loaded
+	 * @return Pca the loaded model
+	 * @throws CHttpException
+	 */
+	public function loadModel($id)
+	{
+		$model=Pca::model()->findByPk($id);
+		
+		if($model===null)
+			throw new CHttpException(404,'The requested page does not exist.');
+		return $model;
+	}
+
+
+
+	
+
 
 	public function actionReturnParent()
 	{
@@ -677,9 +633,9 @@ class PcaController extends Controller
 				echo "nextitem;";
 				continue;
 			}
-
+			
 	 		$data=CHtml::listData($model->findAll($fk_name."=".$fk_val." ".$order_by),$pk[$i],$name_field);
-
+	 		
 		    foreach($data as $value=>$name)
 			    {
 			    	 echo CHtml::tag('option',
@@ -694,13 +650,13 @@ class PcaController extends Controller
 	public function actionReturnLocationDiv()
 	{
 		$region_id = $_POST['region_id'];
-		$model_id = $_POST['model_id'];
-		$loc_number = $_POST['loc_number'];
+		$model_id = $_POST['model_id'];	
+		$loc_number = $_POST['loc_number'];	
 		$loc_number = $loc_number + 1;
 
 		if ($region_id) $data = CHtml::listData(Location::model()->findAll("region_id=$region_id"),'location_id','name');
 		else $data = CHtml::listData(Location::model()->findAll("region_id =-1"),'location_id','name');
-
+		
 		if ($model_id)  $model = $this->loadModel($model_id);
 		else $model = new Pca;
 		//print_r($model);
@@ -753,15 +709,59 @@ class PcaController extends Controller
                 array('type'=>'hidden','id'=> 'hidden_is_new', 'value'=>1,'name'=>'Pca[PcaTargetProgressRel][is_new][]'));
             echo CHtml::tag('input',
                 array('type'=>'hidden','value'=> date("Y-m-d H:i:s"),'name'=>'Pca[PcaTargetProgressRel][received_date][]'));
-
+			
 		    }
 
         }	//;
 			//$targetPrModel[$key]['total'];
 			//$targetPrModel[$key]['shortfall'];
-
-
+		
+		
 	}
+
+    public function addFiles($files, $file_categories, $pca_id)
+    {
+       // $files = CUploadedFile::getInstancesByName('files');
+       // $file_categories = $_POST['UploadedFile']['file_category'];
+
+        // proceed if the images have been set
+        if (isset($files) && count($files) > 0) {
+
+            if(!is_dir(Yii::getPathOfAlias('webroot').'/protected/files/pcas/'. $pca_id))
+            {
+                mkdir(Yii::getPathOfAlias('webroot').'/protected/files/pcas/'. $pca_id);
+                chmod(Yii::getPathOfAlias('webroot').'/protected/files/pcas/'. $pca_id, 0755);
+            }
+
+            // go through each uploaded file
+            foreach ($files as $file_key => $file_value) {
+                if(!is_dir(Yii::getPathOfAlias('webroot').'/protected/files/pcas/'. $pca_id.'/'.$file_categories[$file_key]))
+                {
+                    mkdir(Yii::getPathOfAlias('webroot').'/protected/files/pcas/'.$pca_id.'/'.$file_categories[$file_key]);
+                    chmod(Yii::getPathOfAlias('webroot').'/protected/files/pcas/'. $pca_id.'/'.$file_categories[$file_key], 0755);
+                }
+
+
+                if ($file_value->saveAs(Yii::getPathOfAlias('webroot').'/protected/files/pcas/'. $pca_id.'/'.$file_categories[$file_key].'/'.$file_value->name)) {
+                    // add it to the main model now
+                    $pca_file_add = new PcaFile();
+                    $pca_file_add->file_name = $file_value->name; //it might be $img_add->name for you, filename is just what I chose to call it in my model
+                    $pca_file_add->pca_id= $pca_id; // this links your picture model to the main model (like your user, or profile model)
+                    $pca_file_add->file_category = $file_categories[$file_key];
+
+                    $pca_file_add->save(); // DONE
+                }
+                else
+                {
+                    echo 'Cannot upload!';
+
+                }
+
+            }
+
+
+        }
+    }
 
 	public function saveFiles($files, $categories)
 	{
@@ -827,6 +827,7 @@ class PcaController extends Controller
             echo "File Not Found !";
         }
 	}
+
 
     public function actionDeleteFile($pca_id)
     {

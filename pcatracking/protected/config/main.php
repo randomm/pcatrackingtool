@@ -104,6 +104,9 @@ return array(
 				'<controller:\w+>/<id:\d+>'=>'<controller>/view',
 				'<controller:\w+>/<action:\w+>/<id:\d+>'=>'<controller>/<action>',
 				'<controller:\w+>/<action:\w+>'=>'<controller>/<action>',
+        array('api/v1', 'pattern'=>'api/v1/<path:[\w|\/]+>', 'verb'=>'GET'),
+        'dashboard'=>'dashboard/index'
+        
 			),
 		),
 		
@@ -113,10 +116,10 @@ return array(
 		// uncomment the following to use a MySQL database
 		
 		'db'=>array(
-			'connectionString' => 'mysql:host=localhost;dbname=DATABASE_NAME',
+			'connectionString' => 'mysql:host=127.0.0.1;dbname=pcatracking',
 			'emulatePrepare' => true,
-			'username' => 'USERNAME',
-			'password' => 'PASSWORD',
+			'username' => 'root',
+			'password' => '',
 			'charset' => 'utf8',
 			'tablePrefix' => '', 
 			'enableProfiling'=>true,	   
@@ -124,7 +127,7 @@ return array(
 		
 		'errorHandler'=>array(
 			// use 'site/error' action to display errors
-			'errorAction'=>'site/error',
+			//'errorAction'=>'site/error',
 		),
 		'log'=>array(
 			'class'=>'CLogRouter',
@@ -160,12 +163,12 @@ return array(
                 //     'showInFireBug' => true,
                 //     'ignoreAjaxInFireBug' => true,
                 // ), 
-                 array(
-                         'class' => 'CDbLogRoute',
-                         'levels' => 'info, warning, error',
-                         'connectionID' => 'db',
-                         'autoCreateLogTable' => true,
-                     ),
+    //             array(
+    //                     'class' => 'CDbLogRoute',
+    //                     'levels' => 'info, warning, error',
+    //                     'connectionID' => 'db',
+    //                     'autoCreateLogTable' => true,
+    //                 ),
                 // array(
                 //     'class'=>'CProfileLogRoute',
                 //     'report'=>'summary',

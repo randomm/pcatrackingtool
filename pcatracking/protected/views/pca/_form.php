@@ -286,12 +286,11 @@ Yii::app()->clientScript->registerCssFile(Yii::app()->baseUrl . '/themes/bootstr
         <?php
         $grants = array();
 
-        if (isset($_POST['Pca']['PcaGrantRel']['grant_id'][0])) {
-            echo $_POST['Pca']['PcaGrantRel']['grant_id'][0];
+        if (isset($_POST['Pca']['PcaGrantRel']['grant_id'][0]) != NULL) {
             if (isset($model->pca_id)) {
                 $model->transpose($_POST['Pca']['PcaGrantRel'], $post_grants);
                 foreach ($post_grants as $key => $value) {
-                   // $grants[$key] = PcaGrant::model()->find("pca_id=$model->pca_id AND grant_id = " . $value['grant_id']);
+                    $grants[$key] = PcaGrant::model()->find("pca_id=$model->pca_id AND grant_id = " . $value['grant_id']);
                 }
             }
         } else if (isset ($model->PcaGrantRel))$grants = $model->PcaGrantRel;
@@ -426,7 +425,7 @@ Yii::app()->clientScript->registerCssFile(Yii::app()->baseUrl . '/themes/bootstr
 
 $sectors = array();
 //$sectors = $model->PcaSector;
-if (isset($_POST['Pca']['PcaSector'][0])) {
+if (isset($_POST['Pca']['PcaSector'][0]) != NULL) {
     $model->transpose($_POST['Pca']['PcaSector'], $post_sectors);
     foreach ((array)$post_sectors as $key => $value) {
         if ($model->pca_id != NULL)
