@@ -17,10 +17,6 @@ define([
         },
         {
           "color": "#26a200",
-          "label": "Current number of beneficiaries"
-        },
-        {
-          "color": "#006ba2",
           "label": "Total number of beneficiaries"
         }
       ];
