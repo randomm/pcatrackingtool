@@ -21,6 +21,7 @@ define([
       this.collection.fetch({
         success: function() {
           self.collection = self.collection.toJSON();
+          self.collection_original = self.collection;
           self.render();
         }
       });
@@ -55,7 +56,7 @@ define([
     render: function() {
       var self = this;
       if (this.sector_ids != null) {
-        this.collection = _.filter(this.collection, function(item) {
+        this.collection = _.filter(this.collection_original, function(item) {
           return _.indexOf(self.sector_ids, parseInt(item.sector_id)) == -1;
         })
       }
